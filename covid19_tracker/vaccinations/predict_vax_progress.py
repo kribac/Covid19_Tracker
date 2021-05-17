@@ -1,5 +1,6 @@
 import pandas as pd
 from bokeh.plotting import figure, show
+from bokeh.models import Span
 
 FILE_VAX_TIMESERIES = '../../data/germany_vaccinations_timeseries_v2.tsv'
 FILE_DELIVERIES_TIMESERIES = '../../data/germany_deliveries_timeseries_v2.tsv'
@@ -17,13 +18,15 @@ USE_VACCINES = {
 }
 
 DELIVERY_PREDICTION = "prognosis" #"static", "prognosis"
+# DELIVERY_PREDICTION = "static" #"static", "prognosis"
+
 
 SHOW_BIONTECH = True
-SHOW_AZ = False
-SHOW_MODERNA = False
+SHOW_AZ = True
+SHOW_MODERNA = True
 SHOW_JJ = False
 
-END_DATE = "2021-06-30"
+END_DATE = "2021-07-31"
 
 
 PERSONS_TO_VACCINATE = 51087903 # from "pandemieende.de"
@@ -246,43 +249,47 @@ if __name__ == "__main__":
     p1.line(vax_ts.index, vax_ts.personen_voll_kumulativ, line_width=1, line_color="black", line_dash="dashed",
             legend_label="dosen zweit")
 
-    p1.line(vax_ts.index, vax_ts.dosen_biontech_kumulativ, line_color="red", line_width=2,
-            legend_label="BioNTech gesamt")
-    p1.line(vax_ts.index, vax_ts.dosen_biontech_erst_kumulativ, line_color="red", line_width=1,
-            legend_label="BioNTech erst")
-    p1.line(vax_ts.index, vax_ts.dosen_biontech_zweit_kumulativ, line_color="red", line_dash="dashed",
-            legend_label="BioNTech zweit")
-    # p1.line(vax_ts.index, vax_ts.est_bedarf_biontech_zweit_kumulativ, line_color="orange", line_dash="solid",
-    #         legend_label="Bedarf zweit kumulativ (geschätzt)")
-    p1.line(vax_ts.index, vax_ts.est_bedarf_biontech_zweit_rest, line_color="orange", line_dash="dashed",
-            legend_label="Bedarf Biontech zweit Rest (geschätzt)")
+    if SHOW_BIONTECH:
+        p1.line(vax_ts.index, vax_ts.dosen_biontech_kumulativ, line_color="red", line_width=2,
+                legend_label="BioNTech gesamt")
+        p1.line(vax_ts.index, vax_ts.dosen_biontech_erst_kumulativ, line_color="red", line_width=1,
+                legend_label="BioNTech erst")
+        p1.line(vax_ts.index, vax_ts.dosen_biontech_zweit_kumulativ, line_color="red", line_dash="dashed",
+                legend_label="BioNTech zweit")
+        # p1.line(vax_ts.index, vax_ts.est_bedarf_biontech_zweit_kumulativ, line_color="orange", line_dash="solid",
+        #         legend_label="Bedarf zweit kumulativ (geschätzt)")
+        p1.line(vax_ts.index, vax_ts.est_bedarf_biontech_zweit_rest, line_color="orange", line_dash="dashed",
+                legend_label="Bedarf Biontech zweit Rest (geschätzt)")
 
     # p1.line(vax_ts.index, vax_ts.est_dosen_biontech_erst_kumulativ, line_color="orange", line_width=1,
     #         legend_label="Prädikiton BioNTech erst")
     # p1.line(vax_ts.index, vax_ts.est_dosen_biontech_zweit_kumulativ, line_color="orange", line_dash="dashed",
     #         legend_label="Prädiktion BioNTech zweit")
 
-    p1.line(vax_ts.index, vax_ts.dosen_astrazeneca_kumulativ, line_color="green", line_width=2,
-            legend_label="AstraZeneca gesamt")
-    p1.line(vax_ts.index, vax_ts.dosen_astrazeneca_erst_kumulativ, line_color="green", line_width=1,
-            legend_label="AstraZeneca erst")
-    p1.line(vax_ts.index, vax_ts.dosen_astrazeneca_zweit_kumulativ, line_color="green", line_width=1,
-            line_dash="dashed", legend_label="AstraZeneca zweit")
-    p1.line(vax_ts.index, vax_ts.est_bedarf_astrazeneca_zweit_kumulativ, line_color="lightgreen", line_width=1,
-            line_dash="dashed", legend_label="Bedarf AstraZeneca zweit rest (geschätzt)")
+    if SHOW_AZ:
+        p1.line(vax_ts.index, vax_ts.dosen_astrazeneca_kumulativ, line_color="green", line_width=2,
+                legend_label="AstraZeneca gesamt")
+        p1.line(vax_ts.index, vax_ts.dosen_astrazeneca_erst_kumulativ, line_color="green", line_width=1,
+                legend_label="AstraZeneca erst")
+        p1.line(vax_ts.index, vax_ts.dosen_astrazeneca_zweit_kumulativ, line_color="green", line_width=1,
+                line_dash="dashed", legend_label="AstraZeneca zweit")
+        p1.line(vax_ts.index, vax_ts.est_bedarf_astrazeneca_zweit_kumulativ, line_color="lightgreen", line_width=1,
+                line_dash="dashed", legend_label="Bedarf AstraZeneca zweit rest (geschätzt)")
 
-    p1.line(vax_ts.index, vax_ts.dosen_moderna_kumulativ, line_color="blue", line_width=2,
-            legend_label="Moderna gesamt")
-    p1.line(vax_ts.index, vax_ts.dosen_moderna_erst_kumulativ, line_color="blue", line_width=1,
-            legend_label="Moderna erst")
-    p1.line(vax_ts.index, vax_ts.dosen_moderna_zweit_kumulativ, line_color="blue", line_width=1, line_dash="dashed",
-            legend_label="Moderna zweit")
-    p1.line(vax_ts.index, vax_ts.est_bedarf_moderna_zweit_rest, line_color="aqua", line_width=1,
-            line_dash="dashed", legend_label="Bedarf Moderna zweit rest (geschätzt)")
+    if SHOW_MODERNA:
+        p1.line(vax_ts.index, vax_ts.dosen_moderna_kumulativ, line_color="blue", line_width=2,
+                legend_label="Moderna gesamt")
+        p1.line(vax_ts.index, vax_ts.dosen_moderna_erst_kumulativ, line_color="blue", line_width=1,
+                legend_label="Moderna erst")
+        p1.line(vax_ts.index, vax_ts.dosen_moderna_zweit_kumulativ, line_color="blue", line_width=1, line_dash="dashed",
+                legend_label="Moderna zweit")
+        p1.line(vax_ts.index, vax_ts.est_bedarf_moderna_zweit_rest, line_color="aqua", line_width=1,
+                line_dash="dashed", legend_label="Bedarf Moderna zweit rest (geschätzt)")
 
     # p1.line(vax_predictor.deliveries_planned.index, vax_predictor.deliveries_planned.Biontech, line_color="brown", line_width=1,
     #         legend_label="Biontech plan")
-
+    vline = Span(location=vax_predictor.TODAY, dimension='height', line_color='black', line_width=1, line_dash="dashed")
+    p1.renderers.extend([vline])
     p1.legend.location = "top_left"
 
     show(p1)
