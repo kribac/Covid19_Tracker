@@ -5,8 +5,12 @@ from bokeh.models import Span
 FILE_VAX_TIMESERIES = '../../data/germany_vaccinations_timeseries_v2.tsv'
 FILE_DELIVERIES_TIMESERIES = '../../data/germany_deliveries_timeseries_v2.tsv'
 FILE_VAX_BY_STATE = '../../data/germany_vaccinations_by_state.tsv'
-FILE_DELIVERY_PROGNOSIS = "../../data/impfung_lieferprognoseQ2_stand210507.csv"
 
+# Q2 deliveries
+# FILE_DELIVERY_PROGNOSIS = "../../data/impfung_lieferprognoseQ2_stand210507.csv"
+
+# Q2 deliveries + estimates for Q3
+FILE_DELIVERY_PROGNOSIS = "../../data/impfung_lieferprognoseQ2Q3_stand210517.csv"
 
 
 # determine which vaccines are considered in vaccination campaign
@@ -26,10 +30,11 @@ SHOW_AZ = True
 SHOW_MODERNA = True
 SHOW_JJ = False
 
-END_DATE = "2021-07-31"
+END_DATE = "2021-09-30"
 
 
 PERSONS_TO_VACCINATE = 51087903 # from "pandemieende.de"
+POPULATION_GERMANY = 83190556
 
 
 def load_vax_timeseries(file_vax_ts):
@@ -147,6 +152,7 @@ class VaxPredictor:
             capacity_moderna = self.deliveries_planned.loc[day].Moderna
 
         capacity_astrazeneca = 64796 # no clear delivery prognoses for az available yet
+        #capacity_astrazeneca = 100000  # no clear delivery prognoses for az available yet
 
         total_first_shots = 0 # keep track of all daily shots of all vaccines
         total_second_shots = 0
@@ -237,12 +243,20 @@ if __name__ == "__main__":
 
 
     vax_ts["personen_ziel"] = PERSONS_TO_VACCINATE
+    vax_ts["dreiviertel_deutsche"] = 0.75*POPULATION_GERMANY
 
 
+
+    status_fist_shots = vax_ts.personen_erst_kumulativ.loc[vax_predictor.TODAY]
+    print(f"people with one shot: {status_fist_shots}")
+    print(f"this is {status_fist_shots/POPULATION_GERMANY*100}% of the total population")
+    print(f"this is {status_fist_shots / (0.75*POPULATION_GERMANY) * 100}% of 75% of all Germans")
 
     p1 = figure(x_axis_type="datetime", plot_height=600, plot_width=1000)
 
-    p1.line(vax_ts.index, vax_ts.personen_ziel, line_width=2, line_color="red", line_dash="dashed", legend_label="Impfziel")
+    p1.line(vax_ts.index, vax_ts.personen_ziel, line_width=2, line_color="red", line_dash="dashed", legend_label="Impfziel Erwachsene")
+    p1.line(vax_ts.index, vax_ts.dreiviertel_deutsche, line_width=2, line_color="red", line_dash="dashed",
+            legend_label="75% der Bevölkerung")
 
     p1.line(vax_ts.index, vax_ts.dosen_kumulativ, line_width=2, line_color='black', legend_label="dosen gesamt")
     p1.line(vax_ts.index, vax_ts.personen_erst_kumulativ, line_width=1, line_color="black", legend_label="dosen erst")
