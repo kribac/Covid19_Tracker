@@ -82,7 +82,8 @@ def plot_vax_accumulated(vax_predictor, plot_enable):
         plotdata.extend(plot_vax_line(vax_ts, PLOT_VAX_MODERNA))
 
     layout = dict(title="Impfungen kumulativ",
-                  xaxis=dict(title="date", ticklen=5, zeroline=False)
+                  xaxis=dict(title="Datum", ticklen=5, zeroline=False),
+                  height=800,
                   )
 
     fig = go.Figure(data=plotdata, layout=layout)

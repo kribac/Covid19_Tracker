@@ -2,12 +2,15 @@
 TODO
 - add datenstand
 - add JJ
-- backend
+- select date
+
+- tägliche impfungen
 """
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 import pandas as pd
 import dash_auth
 
@@ -26,8 +29,6 @@ DELIVERY_PREDICTION = "prognosis" #"static", "prognosis"
 # DELIVERY_PREDICTION = "static" #"static", "prognosis"
 END_DATE = "2021-09-30"
 
-PERSONS_TO_VACCINATE = 51087903 # from "pandemieende.de"
-POPULATION_GERMANY = 83190556
 
 
 #--------------------------------- PLOT CONTROL
@@ -35,7 +36,7 @@ PLOT_ENABLE = {'all':True, 'biontech':True, 'astrazeneca':True, 'moderna':True}
 #---------------------------------------------
 
 #--------------------------------- APP SETTINGS
-colors = {'background': '#111111',
+colors = {'background': 'lightgray',#'#111111',
           'text': '#7FDBFF'
           }
 #----------------------------------------------
@@ -65,23 +66,26 @@ app_layout = html.Div(
         html.Div(
             style={'backgroundColor': colors['background']},
             children = [
-                html.Label('Multi-Select Dropdown'),
+                html.Label('Anzeige Impfstoffe Einstellungen'),
                 dcc.Dropdown(
+                    id = 'option_select_vax',
                     options =[
-                        {'label': 'New York City', 'value': 'NYC'},
-                        {'label': u'Montréal', 'value': 'MTL'},
-                        {'label': 'San Francisco', 'value': 'SF'},
+                        {'label': 'Gesamt', 'value': 'all'},
+                        {'label': 'BioNTech', 'value': 'biontech'},
+                        {'label': 'Astra Zeneca', 'value': 'astrazeneca'},
+                        {'label': 'Moderna', 'value': 'moderna'},
+                        {'label': 'Johnson & Johnson', 'value': 'johnson'},
                               ],
-                    value='MTL', # default value
+                    value=['all','biontech','astrazeneca','moderna'], # default value
                     multi = True # multi-select dropdown
                 ),
                 #
                 html.Label('Text Box'),
-                dcc.Input(id='my-id', value='MTL', type='text'),
+                dcc.Input(id='my-id', value='biontech', type='text'),
                 html.Div(id='my-div'),],
         ),
         dcc.Graph(
-            id = 'vax_accumulated',
+            id = 'graph_vax_accumulated',
             figure = fig_vax_acc
             # {
             #     'data' : plotdata,
@@ -93,6 +97,31 @@ app_layout = html.Div(
 
 
 app.layout = app_layout
+
+
+@app.callback(
+    Output(component_id='my-div', component_property='children'),
+    [Input(component_id='option_select_vax', component_property='value') ]
+)
+def update_output_div(input_value):
+    return 'You\'ve entered "{}"'.format(input_value)
+
+
+
+#---- callback: selection of vaccines to plot
+@app.callback(
+    Output(component_id='graph_vax_accumulated', component_property='figure'),
+    [Input(component_id='option_select_vax', component_property='value') ]
+)
+def update_vax_graph(input_value):
+    print(f"vaccines to include in graph: {input_value}")
+    plot_enable = {'all': False, 'biontech': False, 'astrazeneca': False, 'moderna': False, 'johnson':False}
+    for vaxtype in input_value:
+        plot_enable[vaxtype] = True
+    fig_vax_acc = plot_vax_accumulated(vax_predictor, plot_enable)
+    return fig_vax_acc
+
+
 
 if __name__ == '__main__':
 
