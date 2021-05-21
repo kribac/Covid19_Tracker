@@ -59,7 +59,7 @@ class VaxPredictor:
 
         self.END_DATE = pd.to_datetime(end_date, format="%Y-%m-%d")
 
-    def loadData(self, file_vax_ts):
+    def loadData(self, file_vax_ts=FILE_VAX_TIMESERIES):
         self.vax_ts = load_vax_timeseries(file_vax_ts)
         self.START_DATE = self.vax_ts.index[0]
         self.TODAY = self.vax_ts.index[-1]
