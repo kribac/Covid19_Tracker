@@ -15,6 +15,7 @@ import pandas as pd
 import dash_auth
 
 from plot_vax import plot_vax_accumulated, plot_vax_daily
+from plot_vax import VaxPlot
 from predict_vax_progress import VaxPredictor
 from data_update import update_vax_data
 
@@ -31,8 +32,10 @@ END_DATE = "2021-09-30"
 
 
 
-#--------------------------------- PLOT CONTROL
-PLOT_ENABLE = {'all':True, 'biontech':True, 'astrazeneca':True, 'moderna':True}
+#--------------------------------- PLOT CONTROL DEFAULTS
+DFLT_PLOT_ENABLE = {'total':True, 'biontech':True, 'astrazeneca':True, 'moderna':True, 'johnson':True}
+DFLT_DAILY = False # show daily or accumulated
+DFLT_ROLLING = False # 7 day rolling average
 #---------------------------------------------
 
 #--------------------------------- APP SETTINGS
@@ -52,9 +55,16 @@ vax_predictor = VaxPredictor(use_vaccines=USE_VACCINES, end_date=END_DATE)
 vax_predictor.loadData()
 vax_predictor.predictVaxTS()
 #----------------------------------------------
-#----------------------------------- CALL PLOT
+#----------------------------------- INIT PLOT
 # plotdata, plotlayout = plot_vax_accumulated(vax_predictor.vax_ts, plot_enable=PLOT_ENABLE)
-fig_vax_acc = plot_vax_accumulated(vax_predictor, plot_enable=PLOT_ENABLE)
+# fig_vax_acc = plot_vax_accumulated(vax_predictor, plot_enable=PLOT_ENABLE)
+
+vaxplot = VaxPlot(vax_predictor)
+vaxplot.enable = DFLT_PLOT_ENABLE
+vaxplot.daily = DFLT_DAILY
+vaxplot.rolling = DFLT_ROLLING
+fig_vax = vaxplot.plotVaxLine()
+
 #----------------------------------------------
 
 
@@ -86,7 +96,7 @@ app_layout = html.Div(
         ),
         dcc.Graph(
             id = 'graph_vax_accumulated',
-            figure = fig_vax_acc
+            figure = fig_vax
             # {
             #     'data' : plotdata,
             #     'layout' : plotlayout
@@ -97,18 +107,18 @@ app_layout = html.Div(
 
 
 # graph settings for accumulated vaccinations
-sub_layout_settings_acc = [
+sub_layout_settings_plot = [
     html.Label('Einstellungen Graph'),
     dcc.Dropdown(
             id = 'opt_select_vax',
             options =[
-                {'label': 'Gesamt', 'value': 'all'},
+                {'label': 'Gesamt', 'value': 'total'},
                 {'label': 'BioNTech', 'value': 'biontech'},
                 {'label': 'Astra Zeneca', 'value': 'astrazeneca'},
                 {'label': 'Moderna', 'value': 'moderna'},
                 {'label': 'Johnson & Johnson', 'value': 'johnson'},
                 ],
-            value=['all','biontech','astrazeneca','moderna'], # default value
+            value=['total','biontech','astrazeneca','moderna', 'johnson'], # default value
             multi = True # multi-select dropdown
         ),
 ]
@@ -140,12 +150,12 @@ app_layout_tmp = html.Div(
         html.Div(
             id = 'settings_graph',
             style = {'backgroundColor': colors['background']},
-            children = sub_layout_settings_acc,
+            children = sub_layout_settings_plot,
         ),
         ### GRAPH
         dcc.Graph(
             id = 'graph_vax',
-            figure = fig_vax_acc,
+            figure = fig_vax,
         )
     ]
 )
@@ -194,11 +204,13 @@ def update_vax_graph(graph_type, vaccine_selection):
     else:
         raise ValueError('not implemented yet')
     print(f"vaccines to include in graph: {vaccine_selection}")
-    plot_enable = {'all': False, 'biontech': False, 'astrazeneca': False, 'moderna': False, 'johnson':False}
+    vaxplot.enable = {'all': False, 'biontech': False, 'astrazeneca': False, 'moderna': False, 'johnson':False}
     for vaxtype in vaccine_selection:
-        plot_enable[vaxtype] = True
-    fig_vax_acc = plot_fcn(vax_predictor, plot_enable)
-    return fig_vax_acc
+        vaxplot.enable[vaxtype] = True
+    fig_vax = vaxplot.plotVaxLine()
+    return fig_vax
+    #fig_vax_acc = plot_fcn(vax_predictor, plot_enable)
+    #return fig_vax_acc
 
 
 
