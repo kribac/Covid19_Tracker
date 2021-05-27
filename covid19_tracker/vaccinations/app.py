@@ -4,7 +4,7 @@ TODO
 - add JJ
 - select date
 
-- tägliche impfungen
+- tägliche impfungen: mit rolling
 """
 
 import dash
@@ -14,7 +14,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import dash_auth
 
-from plot_vax import plot_vax_accumulated
+from plot_vax import plot_vax_accumulated, plot_vax_daily
 from predict_vax_progress import VaxPredictor
 from data_update import update_vax_data
 
@@ -96,29 +96,108 @@ app_layout = html.Div(
 )
 
 
-app.layout = app_layout
+# graph settings for accumulated vaccinations
+sub_layout_settings_acc = [
+    html.Label('Einstellungen Graph'),
+    dcc.Dropdown(
+            id = 'opt_select_vax',
+            options =[
+                {'label': 'Gesamt', 'value': 'all'},
+                {'label': 'BioNTech', 'value': 'biontech'},
+                {'label': 'Astra Zeneca', 'value': 'astrazeneca'},
+                {'label': 'Moderna', 'value': 'moderna'},
+                {'label': 'Johnson & Johnson', 'value': 'johnson'},
+                ],
+            value=['all','biontech','astrazeneca','moderna'], # default value
+            multi = True # multi-select dropdown
+        ),
+]
 
 
-@app.callback(
-    Output(component_id='my-div', component_property='children'),
-    [Input(component_id='option_select_vax', component_property='value') ]
+
+
+app_layout_tmp = html.Div(
+    [
+        ### SELECT TYPE OF GRAPH
+        dcc.Markdown(children = markdown_text),
+        html.Div(
+            id = 'graph_select',
+            children = [
+                html.Label('Auswahl Graph'),
+                dcc.Dropdown(
+                    id = 'opt_graph_type',
+                    options = [
+                        {'label': 'Kumulative Impfungen', 'value':'vax_acc'},
+                        {'label': 'Tägliche Impfungen', 'value': 'vax_daily'},
+                        {'label': 'Lieferungen', 'value': 'vax_deliveries'},
+                    ],
+                    value = 'vax_acc',
+                    multi = False
+                ),
+            ],
+        ),
+        ### SETTINGS OF THE GRAPH
+        html.Div(
+            id = 'settings_graph',
+            style = {'backgroundColor': colors['background']},
+            children = sub_layout_settings_acc,
+        ),
+        ### GRAPH
+        dcc.Graph(
+            id = 'graph_vax',
+            figure = fig_vax_acc,
+        )
+    ]
 )
-def update_output_div(input_value):
-    return 'You\'ve entered "{}"'.format(input_value)
+
+app.layout = app_layout_tmp
 
 
+# @app.callback(
+#     Output(component_id='my-div', component_property='children'),
+#     [Input(component_id='option_select_vax', component_property='value') ]
+# )
+# def update_output_div(input_value):
+#     return 'You\'ve entered "{}"'.format(input_value)
+#
+#
+
+# @app.callback(
+#     Output(component_id='opt_select_vax', component_property='value'),
+#     [Input(component_id='graph_select', component_property='value')]
+# )
+# def adapt_graph_settings(input_value):
+#     if input_value ==
+
+
+# @app.callback(
+#     Output(component_id='opt_select_vax', component_property='value'),
+#     [Input(component_id='graph_select', component_property='value')]
+# )
+# def adapt_graph_settings(input_value):
+#     if input_value ==
 
 #---- callback: selection of vaccines to plot
 @app.callback(
-    Output(component_id='graph_vax_accumulated', component_property='figure'),
-    [Input(component_id='option_select_vax', component_property='value') ]
+    Output(component_id='graph_vax', component_property='figure'),
+    [ Input(component_id='opt_graph_type', component_property='value'),
+      Input(component_id='opt_select_vax', component_property='value') ]
 )
-def update_vax_graph(input_value):
-    print(f"vaccines to include in graph: {input_value}")
+def update_vax_graph(graph_type, vaccine_selection):
+    """
+    update graph based on selected type and vaccines to show
+    """
+    if graph_type == "vax_acc":
+        plot_fcn = plot_vax_accumulated
+    elif graph_type == "vax_daily":
+        plot_fcn = plot_vax_daily
+    else:
+        raise ValueError('not implemented yet')
+    print(f"vaccines to include in graph: {vaccine_selection}")
     plot_enable = {'all': False, 'biontech': False, 'astrazeneca': False, 'moderna': False, 'johnson':False}
-    for vaxtype in input_value:
+    for vaxtype in vaccine_selection:
         plot_enable[vaxtype] = True
-    fig_vax_acc = plot_vax_accumulated(vax_predictor, plot_enable)
+    fig_vax_acc = plot_fcn(vax_predictor, plot_enable)
     return fig_vax_acc
 
 

@@ -67,6 +67,40 @@ PLOT_VAX_MODERNA = dict(
 )
 
 
+def plot_vax_daily(vax_predictor, plot_enable):
+
+    vax_ts = vax_predictor.vax_ts
+
+    plotdata = []
+    if plot_enable['all']:
+        plotdata.extend(plot_vax_line(vax_ts, PLOT_VAX_ALL, daily=True))
+    if plot_enable['biontech']:
+        plotdata.extend(plot_vax_line(vax_ts, PLOT_VAX_BIONTECH, daily=True))
+    if plot_enable['astrazeneca']:
+        plotdata.extend(plot_vax_line(vax_ts, PLOT_VAX_ASTRAZENECA, daily=True))
+    if plot_enable['moderna']:
+        plotdata.extend(plot_vax_line(vax_ts, PLOT_VAX_MODERNA, daily=True))
+
+    layout = dict(title="Impfungen kumulativ",
+                  xaxis=dict(title="Datum", ticklen=5, zeroline=False),
+                  height=800,
+                  )
+
+    fig = go.Figure(data=plotdata, layout=layout)
+
+    fig.add_hline(y=POPULATION_GERMANY, line=dict(color='darkgrey',dash='solid', width=1),
+                  annotation_text="100% Gesamtbevölkerung", annotation_position="top left")
+    fig.add_hline(y=0.75*POPULATION_GERMANY, line=dict(color='darkgrey', dash='solid', width=1),
+                  annotation_text="75% Gesamtbevölkerung", annotation_position="top left")
+    fig.add_hline(y=0.6*POPULATION_GERMANY, line=dict(color='darkgrey', dash='solid', width=1),
+                  annotation_text="60% Gesamtbevölkerung", annotation_position="top left")
+
+    fig.add_vline(x=vax_predictor.TODAY, line=dict(color='darkorange',width=1))
+
+    return fig #plotdata, layout
+
+
+
 def plot_vax_accumulated(vax_predictor, plot_enable):
 
     vax_ts = vax_predictor.vax_ts
@@ -100,17 +134,18 @@ def plot_vax_accumulated(vax_predictor, plot_enable):
     return fig #plotdata, layout
 
 
-def plot_vax_line(vax_ts, plot_props):
+def plot_vax_line(vax_ts, plot_props, daily=False):
     """
     plot timeseries of vaccinations
     """
     cols = plot_props['column_names']
     linestyles = plot_props['linestyles']
 
+
     plotdata = [
         go.Scatter(
             x = vax_ts.index,
-            y = vax_ts[cols[i]],
+            y = vax_ts[cols[i]] if daily is False else vax_ts[cols[i]].diff(),
             name = plot_props['names'][i],
             mode = "lines",
             marker = dict(color=plot_props['color']),
