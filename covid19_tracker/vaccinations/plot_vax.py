@@ -32,9 +32,9 @@ POPULATION_GERMANY = 83190556
 
 # PLOT PROPERTIES
 
-PLOT_ENABLE = {'all':True, 'biontech':True, 'astrazeneca':True, 'moderna':True}
+PLOT_ENABLE = {'total':True, 'biontech':True, 'astrazeneca':True, 'moderna':True, 'johnson':True}
 
-PLOT_VAX_ALL = dict(
+PLOT_VAX_TOTAL = dict(
     #enable=True,
     column_names = ["dosen_kumulativ", "personen_erst_kumulativ", "personen_voll_kumulativ"],
     names = ["Dosen gesamt", "Erstimpfungen gesamt", "Vollgeimpfte gesamt"],
@@ -65,6 +65,104 @@ PLOT_VAX_MODERNA = dict(
     linestyles = ["dot", "solid", "dash" ],
     color = "green",
 )
+
+PLOT_VAX_JOHNSON = dict(
+    #enable=True,
+    column_names = ["dosen_johnson_kumulativ"],
+    names = ["JJ Vollgeimpfte"],
+    linestyles = ["dash"],
+    color = "darkkhaki",
+)
+
+class VaxPlot:
+
+    def __init__(self, vax_predictor):
+        self.vax_predictor = vax_predictor
+        self.vax_ts_plot = vax_predictor.vax_ts # time series for plotting
+
+        self.plot_vax_settings = {
+            'total' : PLOT_VAX_TOTAL,
+            'biontech' : PLOT_VAX_BIONTECH,
+            'moderna' : PLOT_VAX_MODERNA,
+            'astrazeneca' : PLOT_VAX_ASTRAZENECA,
+            'johnson' : PLOT_VAX_JOHNSON,
+        }
+
+        self.daily = False # plot daily vaccinations
+        self.rolling = False # smooth vaccinations
+
+        self.plot_type = 'line'
+
+        self.enable = PLOT_ENABLE
+
+        self.updateData()
+
+    def updateData(self):
+
+        vax_ts_plot = self.vax_predictor.vax_ts
+        if self.daily is True:
+            vax_ts_plot = vax_ts_plot.diff()
+        if self.rolling is True:
+            vax_ts_plot = vax_ts_plot.rolling(7).mean()
+
+        self.vax_ts_plot = vax_ts_plot
+
+    def plotVaxLine(self):
+        """ vaccinaitons line plot """
+
+        plotdata = []
+        if self.enable['total']:
+            plotdata.extend( self._plotVaxLine1('total') )
+        if self.enable['biontech']:
+            plotdata.extend(self._plotVaxLine1('biontech'))
+        if self.enable['astrazeneca']:
+            plotdata.extend(self._plotVaxLine1('astrazeneca'))
+        if self.enable['moderna']:
+            plotdata.extend(self._plotVaxLine1('moderna'))
+        if self.enable['johnson']:
+            plotdata.extend(self._plotVaxLine1('johnson'))
+
+
+        layout = dict(title="Impfungen kumulativ",
+                      xaxis=dict(title="Datum", ticklen=5, zeroline=False),
+                      height=800,
+                      )
+
+        fig = go.Figure(data=plotdata, layout=layout)
+
+        if not self.daily:
+            fig.add_hline(y=POPULATION_GERMANY, line=dict(color='darkgrey', dash='solid', width=1),
+                          annotation_text="100% Gesamtbevölkerung", annotation_position="top left")
+            fig.add_hline(y=0.75 * POPULATION_GERMANY, line=dict(color='darkgrey', dash='solid', width=1),
+                          annotation_text="75% Gesamtbevölkerung", annotation_position="top left")
+            fig.add_hline(y=0.6 * POPULATION_GERMANY, line=dict(color='darkgrey', dash='solid', width=1),
+                          annotation_text="60% Gesamtbevölkerung", annotation_position="top left")
+
+        fig.add_vline(x=self.vax_predictor.TODAY, line=dict(color='darkorange', width=1))
+
+
+        return fig
+
+
+    def _plotVaxLine1(self, vaxname):
+        """ line plot for a single vaccine type """
+        plot_props = self.plot_vax_settings[vaxname]
+        cols = plot_props['column_names']
+        linestyles = plot_props['linestyles']
+
+        plotdata = [
+            go.Scatter(
+                x=self.vax_ts_plot.index,
+                y=self.vax_ts_plot[cols[i]],
+                name=plot_props['names'][i],
+                mode="lines",
+                marker=dict(color=plot_props['color']),
+                line=dict(dash=linestyles[i])
+                # text = vax_ts.dosen_kumulativ
+            ) for i in range(len(cols))
+        ]
+        return plotdata
+
 
 
 def plot_vax_daily(vax_predictor, plot_enable):
@@ -180,12 +278,14 @@ if __name__ == "__main__":
     print(f"this is {status_fist_shots/POPULATION_GERMANY*100}% of the total population")
     print(f"this is {status_fist_shots / (0.75*POPULATION_GERMANY) * 100}% of 75% of all Germans")
 
-    plot_enable = PLOT_ENABLE #{'all': True, 'biontech': True}
-    plotdata, layout = plot_vax_accumulated(vax_ts, plot_enable)
 
-    #plotdata.extend( plot_vax_accumulated(vax_ts, PLOT_VAX_BIONTECH))
-    # layout = dict(title="Impfungen kumulativ",
-    #               xaxis=dict(title="date", ticklen=5, zeroline=False)
-    #               )
-    fig = go.Figure(data=plotdata)
+    vaxplot = VaxPlot(vax_predictor)
+    fig = vaxplot.plotVaxLine()
     fig.write_html('vaxplot_test.html', auto_open=True)
+
+
+    # plot_enable = PLOT_ENABLE #{'all': True, 'biontech': True}
+    # plotdata, layout = plot_vax_accumulated(vax_ts, plot_enable)
+    #
+    #   fig = go.Figure(data=plotdata)
+    # fig.write_html('vaxplot_test.html', auto_open=True)
