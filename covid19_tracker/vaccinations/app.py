@@ -1,9 +1,7 @@
 """
 TODO
 - az: second shots modeling
-- update deliveries: done
-- add delivery prognoses for AZ and JJ
-- model ausfälle of vaccines
+- model ausfälle of vaccines in app
 - plot delivered/planned
 
 - Zweitimpfungen: Bedarf vs tatsächlich
