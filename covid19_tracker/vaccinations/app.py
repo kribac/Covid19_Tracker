@@ -1,8 +1,7 @@
 """
 TODO
-- add JJ to calculations
 - az: second shots modeling
-- update deliveries
+- update deliveries: done
 - add delivery prognoses for AZ and JJ
 - model ausfälle of vaccines
 - plot delivered/planned

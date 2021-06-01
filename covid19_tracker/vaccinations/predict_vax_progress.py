@@ -8,9 +8,10 @@ FILE_VAX_BY_STATE = '../../data/germany_vaccinations_by_state.tsv'
 
 # Q2 deliveries
 # FILE_DELIVERY_PROGNOSIS = "../../data/impfung_lieferprognoseQ2_stand210507.csv"
-
 # Q2 deliveries + estimates for Q3
-FILE_DELIVERY_PROGNOSIS = "../../data/impfung_lieferprognoseQ2Q3_stand210517.csv"
+#FILE_DELIVERY_PROGNOSIS = "../../data/impfung_lieferprognoseQ2Q3_stand210517.csv"
+FILE_DELIVERY_PROGNOSIS = "../../data/impfung_lieferprognoseQ2Q3_stand210601.csv"
+
 
 
 # determine which vaccines are considered in vaccination campaign
@@ -43,8 +44,11 @@ def load_vax_timeseries(file_vax_ts):
     return vax_ts
 
 def load_planned_deliveries(file_planned_deliveries):
+    """
+    read delivery plans. Empty cells are filled with zeros.
+    """
     planned_doses = pd.read_csv(FILE_DELIVERY_PROGNOSIS, sep=";", index_col="Wochenmontag",
-                                usecols=["Wochenmontag", "Biontech", "Moderna"])
+                                usecols=["Wochenmontag", "Biontech", "Moderna", "AstraZeneca", "Johnson"]).fillna(value=0)
     planned_doses.index = pd.to_datetime(planned_doses.index, format="%d.%m.%Y")
     return planned_doses
 
@@ -78,6 +82,8 @@ class VaxPredictor:
             df = df.reindex(idx_new, method="ffill", fill_value=0)
             df.Biontech = df.Biontech / 7  # from weekly doses to daily
             df.Moderna = df.Moderna / 7
+            df.AstraZeneca = df.AstraZeneca / 7
+            df.Johnson = df.Johnson / 7
 
         self.deliveries_planned = df
 
@@ -144,13 +150,15 @@ class VaxPredictor:
         if DELIVERY_PREDICTION == "static":
             capacity_biontech = 547441 # daily
             capacity_moderna = 50901
+            capacity_astrazeneca = 64796  # no clear delivery prognoses for az available yet
+            # capacity_astrazeneca = 100000  # no clear delivery prognoses for az available yet
+            capacity_johnson = 40000
         elif DELIVERY_PREDICTION == "prognosis":
             capacity_biontech = self.deliveries_planned.loc[day].Biontech
             capacity_moderna = self.deliveries_planned.loc[day].Moderna
+            capacity_astrazeneca = self.deliveries_planned.loc[day].AstraZeneca
+            capacity_johnson = self.deliveries_planned.loc[day].Johnson
 
-        capacity_astrazeneca = 64796 # no clear delivery prognoses for az available yet
-        #capacity_astrazeneca = 100000  # no clear delivery prognoses for az available yet
-        capacity_johnson = 40000
 
         total_first_shots = 0 # keep track of all daily shots of all vaccines
         total_second_shots = 0
