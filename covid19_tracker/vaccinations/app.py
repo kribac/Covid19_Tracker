@@ -1,10 +1,21 @@
 """
 TODO
-- add datenstand
-- add JJ
-- select date
+- add JJ to calculations
+- az: second shots modeling
+- update deliveries
+- add delivery prognoses for AZ and JJ
+- model ausfälle of vaccines
+- plot delivered/planned
 
-- tägliche impfungen: mit rolling
+- Zweitimpfungen: Bedarf vs tatsächlich
+- add datenstand + data update
+- Wöchentlich
+- select date
+- area plots
+- daily/weekly bar plot
+- disply todays status
+
+- create default settings file with data paths etc
 """
 
 import dash
@@ -24,7 +35,7 @@ USE_VACCINES = {
     "BIONTECH": True,
     "MODERNA": True,
     "ASTRAZENECA":True,
-    "JJ": False
+    "JOHNSON": True
 }
 DELIVERY_PREDICTION = "prognosis" #"static", "prognosis"
 # DELIVERY_PREDICTION = "static" #"static", "prognosis"
@@ -179,21 +190,6 @@ app_layout_tmp = html.Div(
 app.layout = app_layout_tmp
 
 
-# @app.callback(
-#     Output(component_id='my-div', component_property='children'),
-#     [Input(component_id='option_select_vax', component_property='value') ]
-# )
-# def update_output_div(input_value):
-#     return 'You\'ve entered "{}"'.format(input_value)
-#
-#
-
-# @app.callback(
-#     Output(component_id='opt_select_vax', component_property='value'),
-#     [Input(component_id='graph_select', component_property='value')]
-# )
-# def adapt_graph_settings(input_value):
-#     if input_value ==
 
 
 # @app.callback(
@@ -223,18 +219,6 @@ def update_graph_vax(selected_vax, data_options):
 
 
 
-#--- callback: data settings
-# @app.callback(
-#     Output(component_id='graph_vax', component_property='figure'),
-#     [ Input(component_id='opt_select_vax', component_property='value') ]
-# )
-# def update_graph_vaxselection(selected_vax):
-#     """ only disply selected vaccines. This does not affect any calculations of total vaccinations! """
-#     vaxplot.enable = {'all': False, 'biontech': False, 'astrazeneca': False, 'moderna': False, 'johnson': False}
-#     for vaxtype in selected_vax:
-#         vaxplot.enable[vaxtype] = True
-#     fig = update_vax_graph()
-#     return fig
 
 
 

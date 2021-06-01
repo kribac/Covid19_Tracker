@@ -18,7 +18,7 @@ USE_VACCINES = {
     "BIONTECH": True,
     "MODERNA": True,
     "ASTRAZENECA":True,
-    "JJ": False
+    "JOHNSON": False
 }
 
 DELIVERY_PREDICTION = "prognosis" #"static", "prognosis"
@@ -55,7 +55,7 @@ class VaxPredictor:
         self.USE_BIONTECH = use_vaccines["BIONTECH"]
         self.USE_MODERNA = use_vaccines["MODERNA"]
         self.USE_ASTRAZENECA = use_vaccines["ASTRAZENECA"]
-        self.USE_JJ = use_vaccines["JJ"]
+        self.USE_JOHNSON = use_vaccines["JOHNSON"]
 
         self.END_DATE = pd.to_datetime(end_date, format="%Y-%m-%d")
 
@@ -87,9 +87,6 @@ class VaxPredictor:
         """
         self.vax_ts["est_bedarf_biontech_zweit_kumulativ"] = 0 # total doses needed for 2nd shot
         self.vax_ts["est_bedarf_biontech_zweit_rest"] = 0 # remaining doses needed for 2nd shot
-        # self.vax_ts["est_dosen_biontech_kumulativ"] = 0
-        # self.vax_ts["est_dosen_biontech_erst_kumulativ"] = 0
-        # self.vax_ts["est_dosen_biontech_zweit_kumulativ"] = 0
 
         self.vax_ts["est_bedarf_moderna_zweit_kumulativ"] = 0  # total doses needed for 2nd shot
         self.vax_ts["est_bedarf_moderna_zweit_rest"] = 0  # remaining doses needed for 2nd shot
@@ -153,6 +150,7 @@ class VaxPredictor:
 
         capacity_astrazeneca = 64796 # no clear delivery prognoses for az available yet
         #capacity_astrazeneca = 100000  # no clear delivery prognoses for az available yet
+        capacity_johnson = 40000
 
         total_first_shots = 0 # keep track of all daily shots of all vaccines
         total_second_shots = 0
@@ -196,10 +194,20 @@ class VaxPredictor:
             self.vax_ts.at[day, "dosen_astrazeneca_zweit_kumulativ"] = self.vax_ts.loc[day_before].dosen_astrazeneca_zweit_kumulativ + second_shots
             self.vax_ts.at[day, "dosen_astrazeneca_kumulativ"] = self.vax_ts.loc[day_before].dosen_astrazeneca_kumulativ + first_shots + second_shots
 
+        if self.USE_JOHNSON:
+
+            first_shots = capacity_johnson
+
+            total_first_shots += first_shots
+            total_second_shots += first_shots # JJ counts to both metrics
+
+            self.vax_ts.at[day, "dosen_johnson_kumulativ"] = self.vax_ts.loc[day_before].dosen_johnson_kumulativ + first_shots
+
+
         # update total dose count
         self.vax_ts.at[day, "dosen_kumulativ"] = self.vax_ts.loc[day_before].dosen_kumulativ + total_first_shots + total_second_shots
         self.vax_ts.at[day, "personen_erst_kumulativ"] = self.vax_ts.loc[day_before].personen_erst_kumulativ + total_first_shots
-        self.vax_ts.at[day, "personen_voll_kumulativ"] = self.vax_ts.loc[day_before].personen_voll_kumulativ + total_first_shots
+        self.vax_ts.at[day, "personen_voll_kumulativ"] = self.vax_ts.loc[day_before].personen_voll_kumulativ + total_second_shots
 
 
 

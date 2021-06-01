@@ -157,7 +157,8 @@ class VaxPlot:
                 name=plot_props['names'][i],
                 mode="lines",
                 marker=dict(color=plot_props['color']),
-                line=dict(dash=linestyles[i])
+                line=dict(dash=linestyles[i]),
+                # fill='tonexty',
                 # text = vax_ts.dosen_kumulativ
             ) for i in range(len(cols))
         ]

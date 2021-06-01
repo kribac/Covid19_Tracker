@@ -4,3 +4,9 @@ Visualization of Germany's covid cases. Inspired by and uses the data from https
 
 
 * geodata: this is a copy of the geodata from the above repo.
+
+
+
+## Vaccinations
+
+* Johnson & Johnson: counts to both first and fully vaccinated metrics.
