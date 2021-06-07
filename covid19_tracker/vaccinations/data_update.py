@@ -17,7 +17,7 @@ def get_file(file_url, file_disc):
     open(file_disc, 'wb').write(r.content)
 
 
-def load_data_version(json_file):
+def load_data_version(json_file=FILE_DATA_VERSION):
     with open(json_file) as f:
         v = json.load(f)
     return v
@@ -31,7 +31,7 @@ def update_vax_data():
     print("data fetching sucessful")
     print(f"vaccinations last updated: {data_version['vaccinationsLastUpdated']}")
     print(f"deliveries last updated: {data_version['deliveryLastUpdated']}")
-
+    return data_version
 
 if __name__=="__main__":
 

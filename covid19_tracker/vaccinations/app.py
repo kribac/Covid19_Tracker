@@ -5,7 +5,6 @@ TODO
 - plot delivered/planned
 
 - Zweitimpfungen: Bedarf vs tatsächlich
-- add datenstand + data update
 - Wöchentlich
 - select date
 - area plots
@@ -25,7 +24,7 @@ import dash_auth
 from plot_vax import plot_vax_accumulated, plot_vax_daily
 from plot_vax import VaxPlot
 from predict_vax_progress import VaxPredictor
-from data_update import update_vax_data
+from data_update import update_vax_data, load_data_version
 
 #--------------------------------- MODEL SETTINGS
 USE_VACCINES = {
@@ -52,10 +51,18 @@ colors = {'background': 'lightgray',#'#111111',
           }
 #----------------------------------------------
 
+
+#------------------------------ INIT
+update_vax_data()
+data_version = load_data_version()
+
 app = dash.Dash()
 
-markdown_text = '''
+markdown_text = f'''
 # Covid-19 Impfungen Deutschland Prognose
+## Datenstand
+* Impfungen: {data_version['vaccinationsLastUpdated']}
+* Lieferungen: {data_version['deliveryLastUpdated']}
 '''
 
 #---------------------------------
