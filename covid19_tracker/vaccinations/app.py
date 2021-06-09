@@ -3,6 +3,7 @@ TODO
 - az: second shots modeling
 - model ausfälle of vaccines in app
 - plot delivered/planned
+- better doses handling (use delivery to praxend and IZ)
 
 - Zweitimpfungen: Bedarf vs tatsächlich
 - Wöchentlich

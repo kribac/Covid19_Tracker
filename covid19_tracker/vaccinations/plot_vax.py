@@ -47,7 +47,7 @@ PLOT_VAX_BIONTECH = dict(
     column_names = ["dosen_biontech_kumulativ", "dosen_biontech_erst_kumulativ", "dosen_biontech_zweit_kumulativ"],
     names = ["Dosen BioNTech", "Erstimpfungen BioNTech", "Vollgeimpfte BioNTech"],
     linestyles = ["dot", "solid", "dash" ],
-    color = "blue",
+    color = "teal",
 )
 
 PLOT_VAX_ASTRAZENECA = dict(
@@ -55,7 +55,7 @@ PLOT_VAX_ASTRAZENECA = dict(
     column_names = ["dosen_astrazeneca_kumulativ", "dosen_astrazeneca_erst_kumulativ", "dosen_astrazeneca_zweit_kumulativ"],
     names = ["AZ Dosen", "AZ Erstimpfungen", "AZ Vollgeimpfte"],
     linestyles = ["dot", "solid", "dash" ],
-    color = "purple",
+    color = "mediumslateblue",
 )
 
 PLOT_VAX_MODERNA = dict(
@@ -63,7 +63,7 @@ PLOT_VAX_MODERNA = dict(
     column_names = ["dosen_moderna_kumulativ", "dosen_moderna_erst_kumulativ", "dosen_moderna_zweit_kumulativ"],
     names = ["MD Dosen", "MD Erstimpfungen", "MD Vollgeimpfte"],
     linestyles = ["dot", "solid", "dash" ],
-    color = "green",
+    color = "gold",
 )
 
 PLOT_VAX_JOHNSON = dict(
@@ -71,7 +71,7 @@ PLOT_VAX_JOHNSON = dict(
     column_names = ["dosen_johnson_kumulativ"],
     names = ["JJ Vollgeimpfte"],
     linestyles = ["dash"],
-    color = "darkkhaki",
+    color = "mediumvioletred",
 )
 
 class VaxPlot:

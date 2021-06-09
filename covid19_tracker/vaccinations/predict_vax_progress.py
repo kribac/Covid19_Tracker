@@ -19,7 +19,7 @@ USE_VACCINES = {
     "BIONTECH": True,
     "MODERNA": True,
     "ASTRAZENECA":True,
-    "JOHNSON": False
+    "JOHNSON": True
 }
 
 DELIVERY_PREDICTION = "prognosis" #"static", "prognosis"
@@ -32,6 +32,8 @@ SHOW_MODERNA = True
 SHOW_JJ = False
 
 END_DATE = "2021-09-30"
+
+#AZ_BNT_FRACTION = 0.3 # fraction of people using BNT as second dose after AZ
 
 
 PERSONS_TO_VACCINATE = 51087903 # from "pandemieende.de"
@@ -116,6 +118,11 @@ class VaxPredictor:
 
             if day_minus6w > self.START_DATE:
                 doses_first_prev = self.vax_ts.loc[day_minus6w].dosen_biontech_erst_kumulativ # first shots 6 weeks ago
+
+                # people using heterologuous AZ->BNT
+                # doses_first_prev_az = AZ_BNT_FRACTION * self.vax_ts.loc[
+                    # day_minus6w].dosen_astrazeneca_erst_kumulativ  # first shots 12 weeks ago
+
                 doses_second_rest = doses_first_prev - self.vax_ts.loc[day_before].dosen_biontech_zweit_kumulativ
                 self.vax_ts.at[day, "est_bedarf_biontech_zweit_kumulativ"] = doses_first_prev
                 self.vax_ts.at[day, "est_bedarf_biontech_zweit_rest"] = doses_second_rest
